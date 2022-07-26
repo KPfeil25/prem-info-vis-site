@@ -49,19 +49,31 @@
     yellow_cards_overall: "1"
 */
 
+import React from 'react';
 import './App.css'
 import BarChart from './BarChart';
 import { useState } from 'react'
+import {
+  Dropdown,
+  DropdownButton
+} from 'react-bootstrap';
 
 function App() {
   const [file, setFile] = useState();
   const [array, setArray] = useState([]);
+  const [selectedName, setSelectedName] = useState("");
 
   const fileReader = new FileReader();
 
   const handleOnChange = (e) => {
     setFile(e.target.files[0]);
   };
+
+  const handleSelect = (eKey, e) => {
+    // e.persist()
+    console.log(e.target.innerText);
+    setSelectedName(e.target.innerText);
+  }
 
   const csvFileToArray = string => {
     const csvHeader = string.slice(0, string.indexOf("\n")).split(",");
@@ -89,17 +101,15 @@ function App() {
       };
 
       fileReader.readAsText(file);
-      // console.log(array[0].full_name)
     }
   };
 
-  let playerGoals = []
+  let playerGoals = [], playerNames = []
 
   array.forEach((player) => {
     playerGoals.push(player.goals_overall)
+    playerNames.push(player.full_name)
   })
-
-  console.log(playerGoals)
 
   return (
     <div style={{ textAlign: "center" }}>
@@ -122,8 +132,25 @@ function App() {
       </form>
 
       <br />
-      
-      <BarChart data={playerGoals}/>    
+
+      <DropdownButton title="Dropdown" id="player-name-dropdown" onSelect={handleSelect}>
+        {
+          playerNames ? 
+            playerNames.map(item => {
+                return <Dropdown.Item onSelect={handleSelect}>{item}</Dropdown.Item>
+            }): <Dropdown.Item>No Data</Dropdown.Item>
+        }
+      </DropdownButton>
+
+      { array.length != 0 && selectedName != "" ? 
+        <BarChart
+          goalData={playerGoals}
+          playerNameData={playerNames}
+          selectedPlayer={selectedName}
+          allPlayerData={array}
+        /> 
+        : <div> </div>
+      } 
 
     </div>
   );
