@@ -2,3 +2,24 @@
     height: 350px;
     overflow-y: scroll;
 }
+
+.rect {
+    fill: steelblue;
+}
+
+.tspan {
+    margin-bottom: 100px;
+}
+
+body {
+    margin: 30px
+}
+
+svg {
+    /* margin-bottom: 40px; */
+    overflow-x: scroll;
+}
+
+#bar-chart {
+    overflow-x: scroll;
+}

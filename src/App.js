@@ -51,17 +51,35 @@
 
 import React from 'react';
 import './App.css'
-import BarChart from './BarChart';
+import TheBarChart from './BarChart';
 import { useState } from 'react'
 import {
   Dropdown,
   DropdownButton
 } from 'react-bootstrap';
+import { BarChart, Bar, CartesianGrid, XAxis, YAxis } from 'recharts';
+
+const filters = [
+  "Goals",
+  "Assists",
+  "Clean Sheets",
+  "Goals Conceded",
+  "Own Goals",
+  "Penalty Goals",
+  "Penalty Misses",
+  "Yellow Cards",
+  "Red Cards",
+  "Minutes Played",
+  "Appearances",
+  "Minutes Per Goal",
+  "Minutes Per Assist",
+]
 
 function App() {
-  const [file, setFile] = useState();
-  const [array, setArray] = useState([]);
-  const [selectedName, setSelectedName] = useState("");
+  const [file, setFile] = useState()
+  const [array, setArray] = useState([])
+  const [selectedName, setSelectedName] = useState("")
+  const [selectedFilter, setSelectedFilter] = useState("")
 
   const fileReader = new FileReader();
 
@@ -69,10 +87,16 @@ function App() {
     setFile(e.target.files[0]);
   };
 
-  const handleSelect = (eKey, e) => {
+  const handlePlayerSelect = (eKey, e) => {
     // e.persist()
     console.log(e.target.innerText);
     setSelectedName(e.target.innerText);
+  }
+
+  const handleFilterSelect = (eKey, e) => {
+    // e.persist()
+    console.log(e.target.innerText);
+    setSelectedFilter(e.target.innerText);
   }
 
   const csvFileToArray = string => {
@@ -104,16 +128,23 @@ function App() {
     }
   };
 
-  let playerGoals = [], playerNames = []
+  let playerGoals = [], playerNames = [], playersObject = []
 
   array.forEach((player) => {
     playerGoals.push(player.goals_overall)
     playerNames.push(player.full_name)
+    let currObj = {name: player.full_name, goals: parseInt(player.goals_overall)}
+    // console.log(currObj)
+    if (parseInt(player.goals_overall) > 0) {
+      playersObject.push({currObj})
+    }
   })
+
+  // console.log(playersObject)
 
   return (
     <div style={{ textAlign: "center" }}>
-      <h1>Premier League Information Visualization </h1>
+      <h1>Premier League Goal Scorers Information Visualization </h1>
       <form>
         <input
           type={"file"}
@@ -133,24 +164,50 @@ function App() {
 
       <br />
 
-      <DropdownButton title="Dropdown" id="player-name-dropdown" onSelect={handleSelect}>
+      {/* <DropdownButton title="Filters" id="filter-dropdown" onSelect={handleFilterSelect}>
+        {
+          filters.map(item => {
+              return <Dropdown.Item>{item}</Dropdown.Item>
+          })
+        }
+      </DropdownButton>
+      <br />
+      <DropdownButton title="Player List" id="player-name-dropdown" onSelect={handlePlayerSelect}>
         {
           playerNames ? 
             playerNames.map(item => {
-                return <Dropdown.Item onSelect={handleSelect}>{item}</Dropdown.Item>
+                return <Dropdown.Item>{item}</Dropdown.Item>
             }): <Dropdown.Item>No Data</Dropdown.Item>
         }
-      </DropdownButton>
+      </DropdownButton> */}
+      
+      {/* { selectedName ?
+      <h3>{selectedFilter + " for " + selectedName}</h3>
+      : <br /> }
 
       { array.length != 0 && selectedName != "" ? 
-        <BarChart
+        <TheBarChart
           goalData={playerGoals}
           playerNameData={playerNames}
           selectedPlayer={selectedName}
           allPlayerData={array}
+          selectedFilter={selectedFilter}
         /> 
         : <div> </div>
-      } 
+      }  */}
+
+      {console.log(playersObject)}
+
+      { playersObject ?
+        <div id='bar-chart'>
+          <BarChart width={9000} height={400} data={playersObject} barCategoryGap='4%' margin={{bottom: 90}}>
+            <Bar dataKey="currObj.goals" fill="steelblue"/>
+            <XAxis dataKey="currObj.name" interval={0} tick={ {stroke: 'steelblue', fontSize: 4, angle: '-50', fontWeight: 2} }/>
+            <YAxis tick={{stroke: 'gray', dy: 5, dx: 3 , strokeWidth: 1, width: '3px'}}/>
+          </BarChart>
+        </div>
+        : <div></div>
+      }
 
     </div>
   );
